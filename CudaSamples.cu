@@ -23,4 +23,6 @@ void CallHelloWorld(int N)
 	const dim3 grid(iDivUp(N,NWarps),1,1);
 //Kernel launch
         HelloWorld<<<grid,block>>>();
+//Synchronize threads
+        cudaDeviceSynchronize();
 }
