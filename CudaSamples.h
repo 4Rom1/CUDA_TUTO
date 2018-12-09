@@ -5,4 +5,6 @@ inline int iDivUp(int a, int b) { return (a % b != 0) ? (a / b + 1) : (a / b); }
 
 void CallHelloWorld(int N);
 
+void CallHelloWorld2D(int Nx,int Ny);
+
 #endif
