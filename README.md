@@ -7,14 +7,13 @@ $ make
 
   -Display function :
 
-   Display the thread index, the block index and the global index from Kernel launch
-   with a maximal global index equal to N.
+   Display the thread index, the block index and the global index from Kernel launch.
 
    Usage 
 
    ./Display N 
 
-   N is the number of thread you want to display or
+   N is the maximal global index you want to display or
 
    ./Display Nx Ny
 
