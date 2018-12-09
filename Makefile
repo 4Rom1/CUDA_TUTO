@@ -7,13 +7,13 @@ NVCC = nvcc
 NVCCFLAG = -x cu -I. -dc
 NVCCARCH = -arch=sm_35
 
-Targets = Main
+Targets = Display
 
-all : Main 
+all : Display 
 
-Main: Main.cpp CudaSamples.cu
-	$(NVCC) -o Main Main.cpp CudaSamples.cu
+Display: Display.cpp CudaSamples.cu
+	$(NVCC) -o Display Display.cpp CudaSamples.cu
 clean:
-	touch $(Targets); rm Main;
+	touch $(Targets); rm Display;
 
 
