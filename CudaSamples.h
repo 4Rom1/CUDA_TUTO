@@ -7,4 +7,8 @@ void CallHelloWorld(int N);
 
 void CallHelloWorld2D(int Nx,int Ny);
 
+void SumUp(int *Input1, int *Input2, int *Output, int Dim);
+
+void SumUp2D(int *Input1, int *Input2, int *Output, int Width, int Height);
+
 #endif

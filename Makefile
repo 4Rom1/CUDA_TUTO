@@ -9,11 +9,15 @@ NVCCARCH = -arch=sm_35
 
 Targets = Display
 
-all : Display 
+all : Display Sum
 
 Display: Display.cpp CudaSamples.cu
 	$(NVCC) -o Display Display.cpp CudaSamples.cu
+	
+Sum: Sum.cpp CudaSamples.cu
+	$(NVCC) -o Sum Sum.cpp CudaSamples.cu
+	
 clean:
-	touch $(Targets); rm Display;
+	touch $(Targets); rm Display; rm Sum;
 
 
