@@ -78,25 +78,57 @@ __global__ void KernelSumUp2D(int *Input1, int *Input2, int *Output, int Width, 
 
 void SumUp(int *Input1, int *Input2, int *Output, int Dim)
 {
+   //
+   int NBytes = sizeof(int)*Dim;
+   //
+   int *Input1Dev, *Input2Dev, *OutputDev;
+   //
+   (cudaMalloc<int>(&Input1Dev,NBytes));
+   (cudaMalloc<int>(&Input2Dev,NBytes));
+   (cudaMalloc<int>(&OutputDev,NBytes));
+   //
+   (cudaMemcpy(Input1Dev,Input1,NBytes,cudaMemcpyHostToDevice));
+   (cudaMemcpy(Input2Dev,Input2,NBytes,cudaMemcpyHostToDevice));   
+   //
+   
 //N Threads per block 
 	const dim3 block(min(float(NWarps),float(Dim)),1,1);
 //blocks per grid
 	const dim3 grid(iDivUp(Dim,NWarps),1,1);
 //Kernel launch
-        KernelSumUp<<<grid,block>>>(Input1, Input2, Output, Dim);
+        KernelSumUp<<<grid,block>>>(Input1Dev, Input2Dev, OutputDev, Dim);
 //Synchronize threads
-        cudaDeviceSynchronize();
+         cudaDeviceSynchronize();
+//        
+         cudaFree(Input1Dev);
+         cudaFree(Input2Dev);
+         cudaFree(OutputDev);
 }
 
 void SumUp2D(int *Input1, int *Input2, int *Output, int Width, int Height)
 {
+   int NBytes = sizeof(int)*Width*Height;
+   //
+   int *Input1Dev, *Input2Dev, *OutputDev;
+   //
+   (cudaMalloc<int>(&Input1Dev,NBytes));
+   (cudaMalloc<int>(&Input2Dev,NBytes));
+   (cudaMalloc<int>(&OutputDev,NBytes));
+   //
+   (cudaMemcpy(Input1Dev,Input1,NBytes,cudaMemcpyHostToDevice));
+   (cudaMemcpy(Input2Dev,Input2,NBytes,cudaMemcpyHostToDevice));  
 //N Threads per block 
 	const dim3 block(min(float(NWarps),float(Width)),min(float(NWarps),float(Height)),1);
 //2d blocks per grid
 	const dim3 grid(iDivUp(Width,NWarps),iDivUp(Height,NWarps),1);
 //Kernel launch
-        KernelSumUp2D<<<grid,block>>>(Input1, Input2, Output, Width, Height);
+        KernelSumUp2D<<<grid,block>>>(Input1Dev, Input2Dev, OutputDev, Width, Height);
 //Synchronize threads
         cudaDeviceSynchronize();
+//
+         cudaFree(Input1Dev);
+         cudaFree(Input2Dev);
+         cudaFree(OutputDev);       
+          
 }
 
