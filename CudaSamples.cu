@@ -6,6 +6,26 @@
 #include "CudaSamples.h"
 #define NWarps 32
 
+// Inputs array with random numbers [1,9999].
+void Randomize(int *array, int N){
+  srand (time(NULL)); // initialization.
+
+  for(int i = 0; i < N; i++){
+    array[i] = (int) rand() % 10000;
+  }
+}
+//
+//
+int CompareOutputs(int *Input1,int *Input2, int *Output, int N) {
+//
+       int Diff=0;
+	for(int i = 0; i < N ; i++) {
+		Diff += (Input1[i] + Input2[i] - Output[i])*(Input1[i] + Input2[i] - Output[i]);
+	}
+      if(Diff==0){return 1;}
+      else{return 0;}	
+}
+//
 __global__ void HelloWorld()
 {
 	//Global index build with blocks and threads
@@ -76,13 +96,24 @@ __global__ void KernelSumUp2D(int *Input1, int *Input2, int *Output, int Width, 
          }
 }
 
-void SumUp(int *Input1, int *Input2, int *Output, int Dim)
+int SumUp(int Dim)
 {
    //
    int NBytes = sizeof(int)*Dim;
    //
    int *Input1Dev, *Input2Dev, *OutputDev;
    //
+   int *Input1, *Input2, *Output;
+   //
+   Input1 = (int*) malloc (Dim);
+   Input2 = (int*) malloc (Dim);
+   Output = (int*) malloc (Dim);
+
+   Randomize(Input1, Dim);
+
+   Randomize(Input2, Dim);
+
+
    (cudaMalloc<int>(&Input1Dev,NBytes));
    (cudaMalloc<int>(&Input2Dev,NBytes));
    (cudaMalloc<int>(&OutputDev,NBytes));
@@ -100,21 +131,38 @@ void SumUp(int *Input1, int *Input2, int *Output, int Dim)
 //Synchronize threads
          cudaDeviceSynchronize();
 //        
+ (cudaMemcpy(Output,OutputDev,NBytes,cudaMemcpyDeviceToHost));   
+//
          cudaFree(Input1Dev);
          cudaFree(Input2Dev);
          cudaFree(OutputDev);
+//
+         free(Input1);
+         free(Input2);
+         free(Output);
+return CompareOutputs(Input1,Input2, Output,Dim); 
 }
 
-void SumUp2D(int *Input1, int *Input2, int *Output, int Width, int Height)
+int SumUp2D(int Width, int Height)
 {
    int NBytes = sizeof(int)*Width*Height;
-   //
+//
+   int *Input1, *Input2, *Output;
+//
+   Input1 = (int*) malloc (Width*Height);
+   Input2 = (int*) malloc (Width*Height);
+   Output = (int*) malloc (Width*Height);
+//
    int *Input1Dev, *Input2Dev, *OutputDev;
-   //
+//
    (cudaMalloc<int>(&Input1Dev,NBytes));
    (cudaMalloc<int>(&Input2Dev,NBytes));
    (cudaMalloc<int>(&OutputDev,NBytes));
-   //
+//
+   Randomize(Input1, Width*Height);
+//
+   Randomize(Input2, Width*Height);
+
    (cudaMemcpy(Input1Dev,Input1,NBytes,cudaMemcpyHostToDevice));
    (cudaMemcpy(Input2Dev,Input2,NBytes,cudaMemcpyHostToDevice));  
 //N Threads per block 
@@ -126,9 +174,17 @@ void SumUp2D(int *Input1, int *Input2, int *Output, int Width, int Height)
 //Synchronize threads
         cudaDeviceSynchronize();
 //
+    (cudaMemcpy(Output,OutputDev,NBytes,cudaMemcpyDeviceToHost)); 
+
+
          cudaFree(Input1Dev);
          cudaFree(Input2Dev);
-         cudaFree(OutputDev);       
-          
+         cudaFree(OutputDev);   
+//
+         free(Input1);
+         free(Input2);
+         free(Output);    
+// 
+return CompareOutputs(Input1,Input2, Output,Width*Height);         
 }
 
