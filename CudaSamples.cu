@@ -20,10 +20,9 @@ int CompareOutputs(int *Input1,int *Input2, int *Output, int N) {
 //
        int Diff=0;
 	for(int i = 0; i < N ; i++) {
-		Diff += (Input1[i] + Input2[i] - Output[i])*(Input1[i] + Input2[i] - Output[i]);
+		Diff += ((Input1[i] + Input2[i] - Output[i])*(Input1[i] + Input2[i] - Output[i]));
 	}
-      if(Diff==0){return 1;}
-      else{return 0;}	
+        return Diff;	
 }
 //
 __global__ void HelloWorld()
@@ -63,7 +62,7 @@ void CallHelloWorld(int N)
 void CallHelloWorld2D(int Nx,int Ny)
 {
 //N Threads per block 
-	const dim3 block(min(float(NWarps),float(Nx)),min(float(NWarps),float(Ny)),1);
+	const dim3 block(min(NWarps,Nx),min(NWarps,Ny),1);
 //2d blocks per grid
 	const dim3 grid(iDivUp(Nx,NWarps),iDivUp(Ny,NWarps),1);
 //Kernel launch
@@ -79,6 +78,7 @@ __global__ void KernelSumUp(int *Input1, int *Input2, int *Output, int Dim)
         if(index<Dim)
          {
           Output[index]=Input1[index]+Input2[index];
+          //printf("Index %d, Input1[index] %d Input2[index] %d\n",index,Input1[index],Input2[index]);
          }	
 }
 __global__ void KernelSumUp2D(int *Input1, int *Input2, int *Output, int Width, int Height)
@@ -105,25 +105,25 @@ int SumUp(int Dim)
    //
    int *Input1, *Input2, *Output;
    //
-   Input1 = (int*) malloc (Dim);
-   Input2 = (int*) malloc (Dim);
-   Output = (int*) malloc (Dim);
+   Input1 = new int[Dim];
+   Input2 = new int[Dim];
+   Output = new int[Dim];
 
    Randomize(Input1, Dim);
 
    Randomize(Input2, Dim);
 
 
-   (cudaMalloc<int>(&Input1Dev,NBytes));
-   (cudaMalloc<int>(&Input2Dev,NBytes));
-   (cudaMalloc<int>(&OutputDev,NBytes));
+   (cudaMalloc(&Input1Dev,NBytes));
+   (cudaMalloc(&Input2Dev,NBytes));
+   (cudaMalloc(&OutputDev,NBytes));
    //
    (cudaMemcpy(Input1Dev,Input1,NBytes,cudaMemcpyHostToDevice));
    (cudaMemcpy(Input2Dev,Input2,NBytes,cudaMemcpyHostToDevice));   
    //
    
 //N Threads per block 
-	const dim3 block(min(float(NWarps),float(Dim)),1,1);
+	const dim3 block(min(NWarps,Dim),1,1);
 //blocks per grid
 	const dim3 grid(iDivUp(Dim,NWarps),1,1);
 //Kernel launch
@@ -137,10 +137,13 @@ int SumUp(int Dim)
          cudaFree(Input2Dev);
          cudaFree(OutputDev);
 //
-         free(Input1);
-         free(Input2);
-         free(Output);
-return CompareOutputs(Input1,Input2, Output,Dim); 
+int Check=CompareOutputs(Input1,Input2, Output,Dim); 
+
+         delete [] Input1;
+         delete [] Input2;
+         delete [] Output;
+         
+         return Check;
 }
 
 int SumUp2D(int Width, int Height)
@@ -149,24 +152,25 @@ int SumUp2D(int Width, int Height)
 //
    int *Input1, *Input2, *Output;
 //
-   Input1 = (int*) malloc (Width*Height);
-   Input2 = (int*) malloc (Width*Height);
-   Output = (int*) malloc (Width*Height);
+   int Dim=Width*Height;
+   Input1 = new int[Dim];
+   Input2 = new int[Dim];
+   Output = new int[Dim];
 //
    int *Input1Dev, *Input2Dev, *OutputDev;
 //
-   (cudaMalloc<int>(&Input1Dev,NBytes));
-   (cudaMalloc<int>(&Input2Dev,NBytes));
-   (cudaMalloc<int>(&OutputDev,NBytes));
+   (cudaMalloc(&Input1Dev,NBytes));
+   (cudaMalloc(&Input2Dev,NBytes));
+   (cudaMalloc(&OutputDev,NBytes));
 //
-   Randomize(Input1, Width*Height);
+   Randomize(Input1, Dim);
 //
-   Randomize(Input2, Width*Height);
+   Randomize(Input2, Dim);
 
    (cudaMemcpy(Input1Dev,Input1,NBytes,cudaMemcpyHostToDevice));
    (cudaMemcpy(Input2Dev,Input2,NBytes,cudaMemcpyHostToDevice));  
 //N Threads per block 
-	const dim3 block(min(float(NWarps),float(Width)),min(float(NWarps),float(Height)),1);
+	const dim3 block(min(NWarps,Width),min(NWarps,Height),1);
 //2d blocks per grid
 	const dim3 grid(iDivUp(Width,NWarps),iDivUp(Height,NWarps),1);
 //Kernel launch
@@ -176,15 +180,12 @@ int SumUp2D(int Width, int Height)
 //
     (cudaMemcpy(Output,OutputDev,NBytes,cudaMemcpyDeviceToHost)); 
 
+int Check=CompareOutputs(Input1,Input2, Output,Dim); 
 
-         cudaFree(Input1Dev);
-         cudaFree(Input2Dev);
-         cudaFree(OutputDev);   
-//
-         free(Input1);
-         free(Input2);
-         free(Output);    
-// 
-return CompareOutputs(Input1,Input2, Output,Width*Height);         
+         delete [] Input1;
+         delete [] Input2;
+         delete [] Output;
+         
+         return Check;        
 }
 
