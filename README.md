@@ -28,11 +28,11 @@ $ make
 
    ./Sum N 
 
-   N is the maximal dimension of the 1d arrays or
+   N is the maximal size of the 1d arrays or
 
    ./Sum Nx Ny
 
-   where (Nx,Ny) are maximal dimensions of the 2d arrays.
+   where (Nx,Ny) are maximal sizes of the 2d arrays.
    
   
   
