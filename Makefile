@@ -11,11 +11,11 @@ Targets = Display
 
 all : Display Sum
 
-Display: Display.cpp CudaSamples.cu
-	$(NVCC) -o Display Display.cpp CudaSamples.cu
+Display: Display.cu CudaSamples.cu
+	$(NVCC) -o Display Display.cu CudaSamples.cu
 	
-Sum: Sum.cpp CudaSamples.cu
-	$(NVCC) -o Sum Sum.cpp CudaSamples.cu
+Sum: Sum.cu CudaSamples.cu
+	$(NVCC) -o Sum Sum.cu CudaSamples.cu
 	
 clean:
 	touch $(Targets); rm Display; rm Sum;

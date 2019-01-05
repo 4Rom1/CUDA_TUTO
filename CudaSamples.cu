@@ -145,6 +145,64 @@ int Check=CompareOutputs(Input1,Input2, Output,Dim);
          
          return Check;
 }
+int SumUpStreams(int Dim)
+{
+   //
+   int NBytes = sizeof(int)*Dim;
+   //
+   int *Input1Dev, *Input2Dev, *OutputDev;
+   //
+   int *Input1, *Input2, *Output;
+   //
+   cudaStream_t stream1,stream2;
+   //
+   cudaStreamCreate(&stream1);
+   cudaStreamCreate(&stream2);
+
+   Input1 = new int[Dim];
+   Input2 = new int[Dim];
+   Output = new int[Dim];
+
+   Randomize(Input1, Dim);
+
+   Randomize(Input2, Dim);
+
+   (cudaMalloc(&Input1Dev,NBytes));
+   (cudaMalloc(&Input2Dev,NBytes));
+   (cudaMalloc(&OutputDev,NBytes));
+   //Asynchronous copy in parrallel
+   (cudaMemcpyAsync(Input1Dev,Input1,NBytes,cudaMemcpyHostToDevice,stream1));
+   (cudaMemcpyAsync(Input2Dev,Input2,NBytes,cudaMemcpyHostToDevice,stream2));   
+   //
+ //Synchronize threads
+         cudaDeviceSynchronize();  
+//N/2 Threads per block 
+	const dim3 block(min(NWarps,iDivUp(Dim,2)),1,1);
+//blocks per grid
+	const dim3 grid(iDivUp(iDivUp(Dim,2),NWarps),1,1);
+//Kernel launch both streams in parallel 
+        KernelSumUp<<<grid,block,0,stream1>>>(Input1Dev, Input2Dev, OutputDev, Dim/2);
+        KernelSumUp<<<grid,block,0,stream2>>>(&Input1Dev[Dim/2], &Input2Dev[Dim/2], &OutputDev[Dim/2], iDivUp(Dim,2));
+//Synchronize threads
+         cudaDeviceSynchronize();
+//        
+ (cudaMemcpy(Output,OutputDev,NBytes,cudaMemcpyDeviceToHost));   
+//
+         cudaFree(Input1Dev);
+         cudaFree(Input2Dev);
+         cudaFree(OutputDev);
+//
+int Check=CompareOutputs(Input1,Input2, Output,Dim); 
+
+         delete [] Input1;
+         delete [] Input2;
+         delete [] Output;
+         
+         return Check;
+}
+
+
+
 
 int SumUp2D(int Width, int Height)
 {

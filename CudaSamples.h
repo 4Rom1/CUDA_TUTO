@@ -12,4 +12,6 @@ int SumUp(int Dim);
 
 int SumUp2D(int Width, int Height);
 
+int SumUpStreams(int Dim);
+
 #endif
