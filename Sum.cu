@@ -18,8 +18,6 @@
 //
 #include <sys/time.h>
 //
-#define TIME_DIFFS(t1, t2) \
-t2.tv_usec - t1.tv_usec  
 //
 int main (int argc,const char* argv[])
 {

@@ -14,4 +14,7 @@ int SumUp2D(int Width, int Height);
 
 int SumUpStreams(int Dim);
 
+#define TIME_DIFFS(t1, t2) \
+t2.tv_usec - t1.tv_usec  
+
 #endif
