@@ -32,7 +32,7 @@ $ make
 
    ./Sum Nx Ny
 
-   where (Nx,Ny) are maximal dimensions of the 2d arrays.
+   where (Nx,Ny) are maximal (rows,columns) of the arrays.
    
   
   
