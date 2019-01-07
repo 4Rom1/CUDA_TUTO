@@ -18,5 +18,21 @@ $ make
    ./Display Nx Ny
 
    Same as above in 2 dimensions with maximal global indexes equal to (Nx,Ny). 
- 
+   
+   
+ -Sum function :
+
+   Sum the indexes of 2 arrays with and without using streams and asynchronous copies.
+
+   Usage 
+
+   ./Sum N 
+
+   N is the maximal size of the 1d arrays or
+
+   ./Sum Nx Ny
+
+   where (Nx,Ny) are maximal sizes of the 2d arrays.
+   
+  
   
