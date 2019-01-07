@@ -36,28 +36,19 @@ int Check2=0;
      {
  Nx=atoi(argv[1]);
      }
-//Time initialization
-  gettimeofday(&begin,NULL);
+//Cuda runtime intialization
+for (int ii=0;ii<20;ii++)
+ cudaFree(0);
+
  printf("Calling sum up 1d, N=%d\n",Nx);
  Check1=SumUp(Nx);
   if(Check1)
   {printf("Sum non identique, Diff square = %d\n",Check1);}
   else
   {printf("Sum identiques\n");}
-//Time end
-     gettimeofday(&end,NULL);
-     delta_time=TIME_DIFFS(begin, end); 
-//Define the maximum size of active space B and residual space
-    printf("time spent synchronous sum %u micros\n", delta_time);
-//Time initialization
-  gettimeofday(&begin,NULL);
+//
  printf("Calling sum up 1d asynchronous, N=%d\n",Nx);
  Check1=SumUpStreams(Nx);
-//Time end
-     gettimeofday(&end,NULL);
-     delta_time=TIME_DIFFS(begin, end); 
-//Define the maximum size of active space B and residual space
-    printf("time spent asynchronous sum %u micros\n", delta_time);
 //
   if(Check1)
   {printf("Sum non identique, Diff square = %d\n",Check1);}
