@@ -7,17 +7,20 @@ NVCC = nvcc
 NVCCFLAG = -x cu -I. -dc
 NVCCARCH = -arch=sm_35
 
-Targets = Display
+Targets = Display Sum MultiStream
 
-all : Display Sum
+all : Display Sum MultiStream
 
 Display: Display.cu CudaSamples.cu
 	$(NVCC) -o Display Display.cu CudaSamples.cu
 	
 Sum: Sum.cu CudaSamples.cu
 	$(NVCC) -o Sum Sum.cu CudaSamples.cu
+
+MultiStream: MultiStream.cu CudaSamples.cu
+	$(NVCC) -o MultiStream MultiStream.cu CudaSamples.cu
 	
 clean:
-	touch $(Targets); rm Display; rm Sum;
+	touch $(Targets); rm $(Targets);
 
 

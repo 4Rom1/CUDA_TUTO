@@ -18,8 +18,6 @@
 //
 #include <sys/time.h>
 //
-#include <pthread.h>
-//
 int main (int argc,const char* argv[])
 {
 int Nx=4,Ny=4;
@@ -68,25 +66,6 @@ for (int ii=0;ii<20;ii++)
   {printf("Sum identiques\n");}
      }   
 
-//Pthread example
-    const int num_threads = 8;
-    pthread_t threads[num_threads];
-
-    for (int i = 0; i < num_threads; i++) {
-        if (pthread_create(&threads[i], NULL, SumUpVoid, &Nx)) {
-            fprintf(stderr, "Error creating threadn");
-            return 1;
-        }
-    }
-
-    for (int i = 0; i < num_threads; i++) {
-        if(pthread_join(threads[i], NULL)) {
-            fprintf(stderr, "Error joining threadn");
-            return 2;
-        }
-    }
-
-    cudaDeviceReset();
 
 
 }

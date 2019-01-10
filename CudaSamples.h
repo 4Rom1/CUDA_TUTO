@@ -1,5 +1,6 @@
 #ifndef CudaSamples_H
 #define CudaSamples_H
+#define NWarps 32
 //
 
 inline int iDivUp(int a, int b) { return (a % b != 0) ? (a / b + 1) : (a / b); }
@@ -17,6 +18,8 @@ int SumUpStreams(int Dim);
 void *SumUpStreamsVoid(void *PtDim);
 
 void *SumUpVoid(void *PtDim);
+
+__global__ void ParSqrtExp(float *Tab, int MaxDim);
 
 #define TIME_DIFFS(t1, t2) \
 t2.tv_usec - t1.tv_usec  

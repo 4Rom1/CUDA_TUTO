@@ -5,7 +5,7 @@
 #include "math.h"
 #include "CudaSamples.h"
 #include <sys/time.h>
-#define NWarps 32
+
 // Inputs array with random numbers [1,9999].
 void Randomize(int *array, int N){
   srand (time(NULL)); // initialization.
@@ -231,147 +231,6 @@ int Check=CompareOutputs(Input1,Input2, Output,Dim);
          return Check;
 }
 
-void *SumUpStreamsVoid(void *PtDim)
-{
-struct timeval begin, end;
-   //
-   int *RePtDim=(int *)PtDim;
-   int Dim=*RePtDim;
-   int NBytes = sizeof(int)*Dim;
-   //
-   int *Input1Dev, *Input2Dev, *OutputDev;
-   //
-   int *Input1, *Input2, *Output;
-   //
-   cudaStream_t stream1,stream2;
-   //
-   gettimeofday(&begin,NULL);
-   cudaStreamCreate(&stream1);
-   cudaStreamCreate(&stream2);
-    gettimeofday(&end,NULL);
-    unsigned int delta_time=TIME_DIFFS(begin, end); 
-    printf("time spent for stream creation %u micros\n", delta_time); 
-
-   Input1 = new int[Dim];
-   Input2 = new int[Dim];
-   Output = new int[Dim];
-
-   Randomize(Input1, Dim);
-
-   Randomize(Input2, Dim);
-
-   gettimeofday(&begin,NULL);
-   (cudaMalloc(&Input1Dev,NBytes));
-   (cudaMalloc(&Input2Dev,NBytes));
-   (cudaMalloc(&OutputDev,NBytes));
-    gettimeofday(&end,NULL);
-    delta_time=TIME_DIFFS(begin, end); 
-    printf("time spent for allocation %u micros\n", delta_time); 
-   gettimeofday(&begin,NULL);
-   //Asynchronous copy in parrallel
-   (cudaMemcpyAsync(Input1Dev,Input1,NBytes,cudaMemcpyHostToDevice,stream1));
-   (cudaMemcpyAsync(Input2Dev,Input2,NBytes,cudaMemcpyHostToDevice,stream2));   
-   //
-    gettimeofday(&end,NULL);
-    delta_time=TIME_DIFFS(begin, end); 
-    printf("time spent for asynchronous copy %u micros\n", delta_time); 
- //Synchronize threads
-         cudaDeviceSynchronize();  
-//N/2 Threads per block 
-	const dim3 block(min(NWarps,iDivUp(Dim,2)),1,1);
-//blocks per grid
-	const dim3 grid(iDivUp(iDivUp(Dim,2),NWarps),1,1);
-//Kernel launch both streams in parallel 
-    gettimeofday(&begin,NULL);
-        KernelSumUp<<<grid,block,0,stream1>>>(Input1Dev, Input2Dev, OutputDev, Dim/2);
-        KernelSumUp<<<grid,block,0,stream2>>>(&Input1Dev[Dim/2], &Input2Dev[Dim/2], &OutputDev[Dim/2], iDivUp(Dim,2));
-//Synchronize threads
-         cudaDeviceSynchronize();
-
-    gettimeofday(&end,NULL);
-    delta_time=TIME_DIFFS(begin, end); 
-    printf("time spent for 2 non synchronous kernel launch %u micros\n", delta_time); 
-//        
- (cudaMemcpy(Output,OutputDev,NBytes,cudaMemcpyDeviceToHost));   
-//
-         cudaFree(Input1Dev);
-         cudaFree(Input2Dev);
-         cudaFree(OutputDev);
-//
-int Check=CompareOutputs(Input1,Input2, Output,Dim); 
-
-         delete [] Input1;
-         delete [] Input2;
-         delete [] Output;
-         
-         return NULL;
-}
-
-
-void *SumUpVoid(void *PtDim)
-{
-struct timeval begin, end;
-   //
-   int *RePtDim=(int *)PtDim;
-   //
-   int Dim=*RePtDim;
-   int NBytes = sizeof(int)*Dim;
-   //
-   int *Input1Dev, *Input2Dev, *OutputDev;
-   //
-   int *Input1, *Input2, *Output;
-   //
-   Input1 = new int[Dim];
-   Input2 = new int[Dim];
-   Output = new int[Dim];
-
-   Randomize(Input1, Dim);
-
-   Randomize(Input2, Dim);
-
-  gettimeofday(&begin,NULL);
-
-   (cudaMalloc(&Input1Dev,NBytes));
-   (cudaMalloc(&Input2Dev,NBytes));
-   (cudaMalloc(&OutputDev,NBytes));
-   //
-    gettimeofday(&end,NULL);
-   unsigned int delta_time=TIME_DIFFS(begin, end); 
-    printf("time spent for allocation %u micros\n", delta_time);
-   gettimeofday(&begin,NULL);
-   (cudaMemcpy(Input1Dev,Input1,NBytes,cudaMemcpyHostToDevice));
-   (cudaMemcpy(Input2Dev,Input2,NBytes,cudaMemcpyHostToDevice));   
-   //
-    gettimeofday(&end,NULL);
-    delta_time=TIME_DIFFS(begin, end); 
-    printf("time spent for synchronous copy %u micros\n", delta_time);
-//N Threads per block 
-	const dim3 block(min(NWarps,Dim),1,1);
-//blocks per grid
-	const dim3 grid(iDivUp(Dim,NWarps),1,1);
-//Kernel launch
-      gettimeofday(&begin,NULL);
-        KernelSumUp<<<grid,block>>>(Input1Dev, Input2Dev, OutputDev, Dim);
-//Synchronize threads
-         cudaDeviceSynchronize();
-//       
-    gettimeofday(&end,NULL);
-    delta_time=TIME_DIFFS(begin, end); 
-    printf("time spent for one kernel launch synchronized %u micros\n", delta_time); 
- (cudaMemcpy(Output,OutputDev,NBytes,cudaMemcpyDeviceToHost));   
-//
-         cudaFree(Input1Dev);
-         cudaFree(Input2Dev);
-         cudaFree(OutputDev);
-//
-int Check=CompareOutputs(Input1,Input2, Output,Dim); 
-
-         delete [] Input1;
-         delete [] Input2;
-         delete [] Output;
-         
-         return NULL;
-}
 
 
 int SumUp2D(int Width, int Height)
@@ -416,4 +275,15 @@ int Check=CompareOutputs(Input1,Input2, Output,Dim);
          
          return Check;        
 }
+
+__global__ void ParSqrtExp(float *x, int n)
+{
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+     for (int ii = tid; ii < n; ii += blockDim.x * gridDim.x) 
+        {x[ii] = float(tid);}
+   
+}
+
+
+
 
