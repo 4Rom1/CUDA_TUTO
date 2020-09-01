@@ -22,7 +22,7 @@ $ make
    
  -Sum function :
 
-   Sum the indexes of 2 arrays with and without using streams and asynchronous copies.
+   Sum the elements of 2 arrays with optional streams and asynchronous copies.
 
    Usage 
 
