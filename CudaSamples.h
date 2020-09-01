@@ -7,7 +7,7 @@ inline int iDivUp(int a, int b) { return (a % b != 0) ? (a / b + 1) : (a / b); }
 
 void CallHelloWorld(int N);
 
-void CallHelloWorld2D(int Nx,int Ny);
+void CallHelloWorld2D(int Nx, int Ny);
 
 int SumUp(int Dim);
 
@@ -21,7 +21,6 @@ void *SumUpVoid(void *PtDim);
 
 __global__ void ParSqrtExp(float *Tab, int MaxDim);
 
-#define TIME_DIFFS(t1, t2) \
-t2.tv_usec - t1.tv_usec  
+#define TIME_DIFFS(t1, t2) t2.tv_usec - t1.tv_usec
 
 #endif
