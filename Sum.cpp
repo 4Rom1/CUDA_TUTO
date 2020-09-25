@@ -1,22 +1,12 @@
-#include <cstdio>
-
-#include <cstdlib>
-
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string>
-
 #include <iostream>
-
 #include <sys/time.h>
-
 #include <unistd.h>
-
 #include <sstream>
-
 #include "CudaSamples.h"
-//
-#include <cuda.h>
-//
-#include <sys/time.h>
 //
 int main(int argc, const char *argv[]) {
   int Nx = 4, Ny = 4;
