@@ -17,17 +17,16 @@ set(LIB_GPU "cuda_lib")
 CUDA_ADD_LIBRARY(${LIB_GPU} SHARED CudaSamples.cu)
 
 set(TARGET_NAME "Display")
-CUDA_ADD_EXECUTABLE(${TARGET_NAME} Display.cu)
+ADD_EXECUTABLE(${TARGET_NAME} Display.cpp)
 target_link_libraries(${TARGET_NAME} ${LIB_GPU} ${CUDA_LIBRARIES})
-target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -pedantic)
+target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra)
 
 set(TARGET_NAME "Sum")
-CUDA_ADD_EXECUTABLE(${TARGET_NAME} Sum.cu)
+ADD_EXECUTABLE(${TARGET_NAME} Sum.cpp)
 target_link_libraries(${TARGET_NAME} ${LIB_GPU} ${CUDA_LIBRARIES})
-target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -pedantic)
+target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra)
 
 set(TARGET_NAME "MultiStream")
-CUDA_ADD_EXECUTABLE(${TARGET_NAME} MultiStream.cu)
+ADD_EXECUTABLE(${TARGET_NAME} MultiStream.cpp)
 target_link_libraries(${TARGET_NAME} ${LIB_GPU} ${CUDA_LIBRARIES})
-target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -pedantic)
-
+target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra)

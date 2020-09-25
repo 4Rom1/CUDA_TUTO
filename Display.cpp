@@ -1,17 +1,8 @@
-#include <cstdio>
-
-#include <cstdlib>
-
+#include <stdio.h>
+#include <stdlib.h>
 #include <string>
-
-#include <iostream>
-
 #include <sys/time.h>
-
 #include <unistd.h>
-
-#include <sstream>
-
 #include "CudaSamples.h"
 
 int main(int argc, char *argv[]) {

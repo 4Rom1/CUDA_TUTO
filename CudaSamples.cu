@@ -2,8 +2,6 @@
 #include "math.h"
 #include "stdio.h"
 #include <cstdlib>
-#include <cuda.h>
-#include <cuda_runtime.h>
 #include <sys/time.h>
 
 // Inputs array with random numbers [1,9999].
@@ -281,5 +279,13 @@ __global__ void ParSqrtExp(float *x, int n) {
   int tid = threadIdx.x + blockIdx.x * blockDim.x;
   for (int ii = tid; ii < n; ii += blockDim.x * gridDim.x) {
     x[ii] = float(tid);
+  }
+}
+
+void parallelSqrtExp(float *data, 
+  std::vector<cudaStream_t> streams, int N, int num_streams) {
+
+  for (int i = 0; i < num_streams; i++) {
+    ParSqrtExp<<<1, 1024, 0, streams[i]>>>(&data[i * N], N);
   }
 }

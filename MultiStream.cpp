@@ -1,6 +1,6 @@
 #include "CudaSamples.h"
-#include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, const char *argv[]) {
   int N = 4;
@@ -14,7 +14,9 @@ int main(int argc, const char *argv[]) {
   }
   //
   const int num_streams = 8;
-  cudaStream_t streams[num_streams];
+ 
+  std::vector<cudaStream_t> streams;
+  streams.resize(num_streams);
   //
   for (int i = 0; i < num_streams; i++) {
     cudaStreamCreate(&streams[i]);
@@ -22,12 +24,9 @@ int main(int argc, const char *argv[]) {
   //
   float *data;
   //
-
-  //
   cudaMalloc(&data, N * sizeof(float) * num_streams);
-  for (int i = 0; i < num_streams; i++) {
-    ParSqrtExp<<<1, 1024, 0, streams[i]>>>(&data[i * N], N);
-  }
+  // 
+  parallelSqrtExp(data, streams, N, num_streams); 
   //
   cudaDeviceSynchronize();
   cudaFree(data);
