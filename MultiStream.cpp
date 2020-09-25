@@ -1,7 +1,6 @@
 #include "CudaSamples.h"
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, const char *argv[]) {
   int N = 4;

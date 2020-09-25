@@ -3,16 +3,12 @@
 #include <stdlib.h>
 #include <string>
 #include <iostream>
-#include <sys/time.h>
 #include <unistd.h>
 #include <sstream>
 #include "CudaSamples.h"
 //
 int main(int argc, const char *argv[]) {
   int Nx = 4, Ny = 4;
-
-  struct timeval begin, end;
-  uint32_t delta_time = 0;
 
   printf("Usage : ./Sum N\n");
   printf("N : maximal global dimension or\n");
