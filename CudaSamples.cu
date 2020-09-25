@@ -26,20 +26,20 @@ int CompareOutputs(int *Input1, int *Input2, int *Output, int N) {
 //
 __global__ void HelloWorld() {
   // Global index build with blocks and threads
-  int index = threadIdx.x + blockDim.x * blockIdx.x;
-  int tId = threadIdx.x;
-  int BlockId = blockIdx.x;
+  const int index = threadIdx.x + blockDim.x * blockIdx.x;
+  const int tId = threadIdx.x;
+  const int BlockId = blockIdx.x;
   printf("Hi from thread number %d, Block number %d, global index %d\n", tId,
          BlockId, index);
 }
 __global__ void HelloWorld2D() {
   // 2D global index
-  int index_x = threadIdx.x + blockDim.x * blockIdx.x;
-  int tId_x = threadIdx.x;
-  int BlockId_x = blockIdx.x;
-  int index_y = threadIdx.y + blockDim.y * blockIdx.y;
-  int tId_y = threadIdx.y;
-  int BlockId_y = blockIdx.y;
+  const int index_x = threadIdx.x + blockDim.x * blockIdx.x;
+  const int tId_x = threadIdx.x;
+  const int BlockId_x = blockIdx.x;
+  const int index_y = threadIdx.y + blockDim.y * blockIdx.y;
+  const int tId_y = threadIdx.y;
+  const int BlockId_y = blockIdx.y;
 
   printf("Hi from thread X number %d, Block X number %d, global index X "
          "number%d\n",
@@ -57,7 +57,7 @@ void CallHelloWorld(int N) {
   // Kernel launch
   HelloWorld<<<grid, block>>>();
   // Synchronize threads
-  cudaDeviceSynchronize();
+  GPU_ERROR_CHECK(cudaDeviceSynchronize())
 }
 
 void CallHelloWorld2D(int Nx, int Ny) {
@@ -68,28 +68,26 @@ void CallHelloWorld2D(int Nx, int Ny) {
   // Kernel launch
   HelloWorld2D<<<grid, block>>>();
   // Synchronize threads
-  cudaDeviceSynchronize();
+  GPU_ERROR_CHECK(cudaDeviceSynchronize())
 }
 
 __global__ void KernelSumUp(int *Input1, int *Input2, int *Output, int Dim) {
   // Global index build with blocks and threads
-  int index = threadIdx.x + blockDim.x * blockIdx.x;
+  const int index = threadIdx.x + blockDim.x * blockIdx.x;
   if (index < Dim) {
     Output[index] = Input1[index] + Input2[index];
-    // printf("Index %d, Input1[index] %d Input2[index]
-    // %d\n",index,Input1[index],Input2[index]);
   }
 }
 __global__ void KernelSumUp2D(int *Input1, int *Input2, int *Output, int Width,
                               int Height) {
   // 2D global Index mapping
-  int index_x = threadIdx.x + blockDim.x * blockIdx.x;
+  const int index_x = threadIdx.x + blockDim.x * blockIdx.x;
   //
-  int index_y = threadIdx.y + blockDim.y * blockIdx.y;
+  const int index_y = threadIdx.y + blockDim.y * blockIdx.y;
   //
   if (index_x < Width && index_y < Height) {
     // 2d mapping
-    int Index_xy = index_y * Width + index_x;
+    const int Index_xy = index_y * Width + index_x;
     Output[Index_xy] = Input1[Index_xy] + Input2[Index_xy];
   }
 }
@@ -135,7 +133,7 @@ int SumUp(int Dim) {
   gettimeofday(&begin, NULL);
   KernelSumUp<<<grid, block>>>(Input1Dev, Input2Dev, OutputDev, Dim);
   // Synchronize threads
-  cudaDeviceSynchronize();
+  GPU_ERROR_CHECK(cudaDeviceSynchronize())
   //
   gettimeofday(&end, NULL);
   delta_time = TIME_DIFFS(begin, end);
@@ -197,7 +195,7 @@ int SumUpStreams(int Dim) {
   delta_time = TIME_DIFFS(begin, end);
   printf("time spent for asynchronous copy %u micros\n", delta_time);
   // Synchronize threads
-  cudaDeviceSynchronize();
+  GPU_ERROR_CHECK(cudaDeviceSynchronize())
   // N/2 Threads per block
   const dim3 block(min(NWarps, iDivUp(Dim, 2)), 1, 1);
   // blocks per grid
@@ -210,7 +208,7 @@ int SumUpStreams(int Dim) {
                                            &Input2Dev[Dim / 2],
                                            &OutputDev[Dim / 2], iDivUp(Dim, 2));
   // Synchronize threads
-  cudaDeviceSynchronize();
+  GPU_ERROR_CHECK(cudaDeviceSynchronize())
 
   gettimeofday(&end, NULL);
   delta_time = TIME_DIFFS(begin, end);
@@ -262,7 +260,7 @@ int SumUp2D(int Width, int Height) {
   KernelSumUp2D<<<grid, block>>>(Input1Dev, Input2Dev, OutputDev, Width,
                                  Height);
   // Synchronize threads
-  cudaDeviceSynchronize();
+  GPU_ERROR_CHECK(cudaDeviceSynchronize())
   //
   (cudaMemcpy(Output, OutputDev, NBytes, cudaMemcpyDeviceToHost));
 
