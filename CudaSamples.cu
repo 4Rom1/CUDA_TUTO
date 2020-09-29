@@ -1,6 +1,6 @@
 #include "CudaSamples.h"
-#include "math.h"
-#include "stdio.h"
+#include <cmath>
+#include <cstdio>
 #include <cstdlib>
 #include <sys/time.h>
 
