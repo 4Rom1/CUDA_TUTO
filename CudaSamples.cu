@@ -139,7 +139,7 @@ int SumUp(int Dim) {
   delta_time = TIME_DIFFS(begin, end);
   printf("time spent for one kernel launch synchronized %u micros\n",
          delta_time);
-  (cudaMemcpy(Output, OutputDev, NBytes, cudaMemcpyDeviceToHost));
+  GPU_ERROR_CHECK(cudaMemcpy(Output, OutputDev, NBytes, cudaMemcpyDeviceToHost))
   //
   cudaFree(Input1Dev);
   cudaFree(Input2Dev);
@@ -214,7 +214,7 @@ int SumUpStreams(int Dim) {
   printf("time spent for 2 non synchronous kernel launch %u micros\n",
          delta_time);
   //
-  (cudaMemcpy(Output, OutputDev, NBytes, cudaMemcpyDeviceToHost));
+  GPU_ERROR_CHECK(cudaMemcpy(Output, OutputDev, NBytes, cudaMemcpyDeviceToHost))
   //
   cudaFree(Input1Dev);
   cudaFree(Input2Dev);
@@ -241,16 +241,16 @@ int SumUp2D(int Width, int Height) {
   //
   int *Input1Dev, *Input2Dev, *OutputDev;
   //
-  (cudaMalloc(&Input1Dev, NBytes));
-  (cudaMalloc(&Input2Dev, NBytes));
-  (cudaMalloc(&OutputDev, NBytes));
+  GPU_ERROR_CHECK(cudaMalloc(&Input1Dev, NBytes))
+  GPU_ERROR_CHECK(cudaMalloc(&Input2Dev, NBytes))
+  GPU_ERROR_CHECK(cudaMalloc(&OutputDev, NBytes))
   //
   Randomize(Input1, Dim);
   //
   Randomize(Input2, Dim);
 
-  (cudaMemcpy(Input1Dev, Input1, NBytes, cudaMemcpyHostToDevice));
-  (cudaMemcpy(Input2Dev, Input2, NBytes, cudaMemcpyHostToDevice));
+  GPU_ERROR_CHECK(cudaMemcpy(Input1Dev, Input1, NBytes, cudaMemcpyHostToDevice))
+  GPU_ERROR_CHECK(cudaMemcpy(Input2Dev, Input2, NBytes, cudaMemcpyHostToDevice))
   // N Threads per block
   const dim3 block(min(NWarps, Width), min(NWarps, Height), 1);
   // 2d blocks per grid
@@ -261,7 +261,7 @@ int SumUp2D(int Width, int Height) {
   // Synchronize threads
   GPU_ERROR_CHECK(cudaDeviceSynchronize())
   //
-  (cudaMemcpy(Output, OutputDev, NBytes, cudaMemcpyDeviceToHost));
+  GPU_ERROR_CHECK(cudaMemcpy(Output, OutputDev, NBytes, cudaMemcpyDeviceToHost))
 
   int Check = CompareOutputs(Input1, Input2, Output, Dim);
 
