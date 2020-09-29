@@ -180,22 +180,21 @@ int SumUpStreams(int Dim) {
   Randomize(Input2, Dim);
 
   gettimeofday(&begin, NULL);
-  (cudaMalloc(&Input1Dev, NBytes));
-  (cudaMalloc(&Input2Dev, NBytes));
-  (cudaMalloc(&OutputDev, NBytes));
+  cudaMalloc(&Input1Dev, NBytes);
+  cudaMalloc(&Input2Dev, NBytes);
+  cudaMalloc(&OutputDev, NBytes);
   gettimeofday(&end, NULL);
   delta_time = TIME_DIFFS(begin, end);
   printf("time spent for allocation %u micros\n", delta_time);
   gettimeofday(&begin, NULL);
   // Asynchronous copy in parrallel
-  (cudaMemcpyAsync(Input1Dev, Input1, NBytes, cudaMemcpyHostToDevice, stream1));
-  (cudaMemcpyAsync(Input2Dev, Input2, NBytes, cudaMemcpyHostToDevice, stream2));
-  //
+  cudaMemcpyAsync(Input1Dev, Input1, NBytes, cudaMemcpyHostToDevice, stream1);
+  cudaMemcpyAsync(Input2Dev, Input2, NBytes, cudaMemcpyHostToDevice, stream2);
+  // Synchronize threads and streams
+  GPU_ERROR_CHECK(cudaDeviceSynchronize())
   gettimeofday(&end, NULL);
   delta_time = TIME_DIFFS(begin, end);
   printf("time spent for asynchronous copy %u micros\n", delta_time);
-  // Synchronize threads
-  GPU_ERROR_CHECK(cudaDeviceSynchronize())
   // N/2 Threads per block
   const dim3 block(min(NWarps, iDivUp(Dim, 2)), 1, 1);
   // blocks per grid
@@ -207,7 +206,7 @@ int SumUpStreams(int Dim) {
   KernelSumUp<<<grid, block, 0, stream2>>>(&Input1Dev[Dim / 2],
                                            &Input2Dev[Dim / 2],
                                            &OutputDev[Dim / 2], iDivUp(Dim, 2));
-  // Synchronize threads
+  // Synchronize threads and streams
   GPU_ERROR_CHECK(cudaDeviceSynchronize())
 
   gettimeofday(&end, NULL);
